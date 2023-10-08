@@ -25,35 +25,35 @@ class DataLoader:
                             mode = "r", encoding = self.encoding)
         
     def __iter__(self):
-        return self
-    
-    def __next__(self):
-        x = self.fX_open.readline()
-        y = self.fy_open.readline()
-        if x != "":
-            return (x, y)
-        else:
-            self.inx_file = self.inx_file + 1
-            if self.inx_file < len(self.files):
-                self.fX_open.close()
-                self.fy_open.close()
-                self.fX_open = open(self.path+"/"+self.files[self.inx_file] + "_text.txt",
-                            mode = "r", encoding = self.encoding)
-                self.fy_open = open(self.path+"/"+self.files[self.inx_file] + "_labels.txt",
-                            mode = "r", encoding = self.encoding)
-                x = self.fX_open.readline()
-                y = self.fy_open.readline()
-                return (x, y)
+        while True:
+            x = self.fX_open.readline()
+            y = self.fy_open.readline()
+            if x != "":
+                yield (x, y)
             else:
-                self.fX_open.close()
-                self.fy_open.close()
-                return None
+                self.inx_file = self.inx_file + 1
+                if self.inx_file < len(self.files):
+                    self.fX_open.close()
+                    self.fy_open.close()
+                    self.fX_open = open(self.path+"/"+self.files[self.inx_file] + "_text.txt",
+                                mode = "r", encoding = self.encoding)
+                    self.fy_open = open(self.path+"/"+self.files[self.inx_file] + "_labels.txt",
+                                mode = "r", encoding = self.encoding)
+                    x = self.fX_open.readline()
+                    y = self.fy_open.readline()
+                    yield (x, y)
+                else:
+                    self.fX_open.close()
+                    self.fy_open.close()
+                    yield None
     
 def load():
     texts = []
     y = []
-    loader = DataLoader()
-    while (new_pair := next(loader)) is not None:
+    loader = iter(DataLoader())
+    for new_pair in loader:
+        if new_pair is None:
+            break
         texts.append(tokenize(new_pair[0]))
         y.append(int(new_pair[1]))
             
