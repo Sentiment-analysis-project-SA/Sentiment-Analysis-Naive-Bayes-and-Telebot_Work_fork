@@ -23,10 +23,9 @@ def predict(self, X: np.array):
         result[i] = ((self.freq * X[i]).sum(axis = 1) * self.apriori).argmax()
     return result
 
-Naive_Bayes = type("NaiveBayes", (object, ), { 
-    "__init__": init, 
-    
-      
-    "fit": fit, 
-    "predict": predict
-}) 
+NaiveBayes = type("NaiveBayes", (object, ), { 
+})
+
+NaiveBayes.__init__ = init
+NaiveBayes.fit = fit
+NaiveBayes.predict = predict
