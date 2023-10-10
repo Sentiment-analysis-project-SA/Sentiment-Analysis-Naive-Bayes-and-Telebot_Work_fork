@@ -141,10 +141,8 @@ def model_training(model, X, y):
 
 @time_count
 def ensemble_training(model, X, y):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30,
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20,
                                                         random_state=76)
-    X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.33,
-                                                    random_state=76)
     model.fit(X_train, y_train)
     print("Accuracy is %f" % accuracy_score(model.predict(X_test), y_test))
     # SAVING RESULTS
