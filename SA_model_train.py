@@ -12,7 +12,7 @@ from words_proc import *
 import copy
 from time import time
 from my_models import *
-
+from ensemble import *
 class DataLoader:
     def __init__(self):
         self.encoding = "latin-1"
@@ -128,10 +128,26 @@ def time_count(func):
   
   
 @time_count
-def model_training():
+def model_training(model, X, y):
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30,
+                                                        random_state=76)
     model.fit(X_train, y_train)
     print("Accuracy is %f" % accuracy_score(model.predict(X_test), y_test))
     #SAVING RESULTS
+    with open('model.data', 'wb') as f:
+        pickle.dump(model, f)
+    with open('words.data', 'wb') as f:
+        pickle.dump(words, f)
+
+@time_count
+def ensemble_training(model, X, y):
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30,
+                                                        random_state=76)
+    X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.33,
+                                                    random_state=76)
+    model.fit(X_train, y_train)
+    print("Accuracy is %f" % accuracy_score(model.predict(X_test), y_test))
+    # SAVING RESULTS
     with open('model.data', 'wb') as f:
         pickle.dump(model, f)
     with open('words.data', 'wb') as f:
@@ -150,6 +166,6 @@ models = {0: GaussianNB(), 1: NaiveBayes()}
 num = 1
 model = models[num]
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33,
-                                                    random_state  = 76)
-model_training()
+
+model = Ensemble([GaussianNB(), NaiveBayes(), ComplementNB(), sklearn.naive_bayes.BernoulliNB()])
+ensemble_training(model, X, y)

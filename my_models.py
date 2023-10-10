@@ -23,3 +23,6 @@ class NaiveBayes:
         for i in range(len(X)):
             result[i] = ((self.freq * X[i]).sum(axis = 1) * self.apriori).argmax()
         return result
+
+    def __str__(self):
+        return "NaiveBayes()"
