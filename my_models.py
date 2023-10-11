@@ -1,16 +1,13 @@
 import numpy as np
 import collections
 from numba import cuda
-from numba import guvectorize, vectorize, float32, float64, int32
+from numba import guvectorize, vectorize, float32, float64, int32, int64
 
-#@vectorize([float64(float64, int32)])
-@guvectorize(["(float64[:,:],int32[:], float64[:,:])"],"(n, m),(n)->(n, m)")
-def GPU_get_freq(freq, apriori, result):
-    result = (freq.transpose()/apriori).transpose()
 
 @guvectorize(["(float64[:,:],int32[:], float64[:,:])"],"(n, m),(m)->(n, m)")
-def mat_div(freq, apriori, result):
-    result = freq / apriori
+def mat_div_vec(freq, apriori, result):
+    for i in range(len(freq)):
+        result[i] = freq[i] / apriori
 
 class NaiveBayes:
     def __init__(self, gpu = True):
@@ -34,15 +31,9 @@ class NaiveBayes:
             self.freq[class_num] += sample
 
         if self.gpu:
-            #dev_freq = cuda.to_device(np.transpose(self.freq))
-            dev_freq = cuda.to_device(self.freq)
+            dev_freq = cuda.to_device(self.freq.transpose())
             dev_apriori = cuda.to_device(self.apriori)
-            result = cuda.device_array(shape = self.freq.shape)
-            #GPU_get_greq(dev_freq, dev_apriori, result)
-            #result = mat_div(dev_freq, dev_apriori)
-            #result GPU_get_freq
-            #self.freq = np.transpose(result.copy_to_host())
-            self.freq = GPU_get_freq(dev_freq, dev_apriori)
+            self.freq = np.transpose(mat_div_vec(dev_freq, dev_apriori))
             self.apriori = self.apriori / self.apriori.sum()
         else:
             self.freq = np.transpose(np.transpose(self.freq) / self.apriori)
