@@ -8,7 +8,7 @@ For training was used dataset from [tweeteval](https://github.com/cardiffnlp/twe
 
 
 1. Install Python 3.9.
-2. Install Python libraries: sklearn, NLTK, pickle, telebot, NumPy. If you are using pip, open command prompt and type "pip3 install <library name">
+2. Install Python libraries: numba, sklearn, NLTK, pickle, telebot, NumPy. If you are using pip, open command prompt and type "pip3 install <library name">
 3. Run nltk_download.py to download dependencies
 4. Run SA_model_train.py to train model on included train data.
 5. Write to https://t.me/BotFather, create bot and get token for him.
