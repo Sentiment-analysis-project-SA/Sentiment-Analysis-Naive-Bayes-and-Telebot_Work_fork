@@ -13,7 +13,7 @@ For training was used dataset from [tweeteval](https://github.com/cardiffnlp/twe
 4. Run SA_model_train.py to train model on included train data.
 5. Write to https://t.me/BotFather, create bot and get token for him.
 6. Create file boa_api.txt. Write api in it. E.g.:
-   ![image](https://github.com/Stanislavius/Sentiment-Analysis-Naive-Bayes-and-Telebot/assets/56927835/62ff7318-39ca-4cce-96d4-c3d701df6342
+   ![image](https://github.com/Stanislavius/Sentiment-Analysis-Naive-Bayes-and-Telebot/assets/56927835/62ff7318-39ca-4cce-96d4-c3d701df6342)
 7. Run SA_bot.py
 8. Open chat with your bot, type /classity and write your message to classify it's sentiment or send a text document where each line is a message.
 
