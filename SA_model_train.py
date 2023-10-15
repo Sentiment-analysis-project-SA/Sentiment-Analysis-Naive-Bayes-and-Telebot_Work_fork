@@ -133,8 +133,17 @@ def model_training():
     with open('words.data', 'wb') as f:
         pickle.dump(words, f)
 
+def model_creation(num):
+    models = {0: GaussianNB(), 1: NaiveBayes()}
+    return models[num]
+
+
+def split(data):
+    pass
+
 
 texts, y = load()
+model_training(*split(my_vectorizer(*load())), model_creation(1))
 label_encoding = False
 if label_encoding:
     X, words = my_label_encoding(texts, y)
