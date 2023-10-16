@@ -68,7 +68,16 @@ class DataLoader:
         return self.loaded_samples[self.i-1]
 
 
-class DataPreparation:
+class CreateDataPreparation(type):
+    singleton = None
+
+    def __call__(cls, *args, **kwargs):
+        if CreateDataPreparation.singleton is None:
+            CreateDataPreparation.singleton = super().__call__(*args, **kwargs)
+        return CreateDataPreparation.singleton
+
+
+class DataPreparation(metaclass = CreateDataPreparation):
     def __init__(self, loader, encoding = "bag"):
         self.texts = []
         self.y = []
@@ -177,6 +186,7 @@ def model_training():
 
 
 dpr = DataPreparation(DataLoader())
+
 X, words, y = dpr.get_data()
 
 models = {0: GaussianNB(), 1: NaiveBayes(), 2: OneVSOne(NaiveBayes), 3: OneVSRest(NaiveBayes)}
