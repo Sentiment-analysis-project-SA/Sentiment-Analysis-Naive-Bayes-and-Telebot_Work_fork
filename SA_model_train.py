@@ -76,6 +76,10 @@ class CreateDataPreparation(type):
             CreateDataPreparation.singleton = super().__call__(*args, **kwargs)
         return CreateDataPreparation.singleton
 
+    @staticmethod
+    def get():
+        return CreateDataPreparation.singleton
+
 
 class DataPreparation(metaclass = CreateDataPreparation):
     def __init__(self, loader, encoding = "bag"):
