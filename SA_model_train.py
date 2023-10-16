@@ -77,9 +77,9 @@ class DataPreparation:
         self.loader = loader
         match encoding:
             case "bag":
-                self.encoding = self.my_vectorizer
+                self.encoding = my_vectorizer
             case "label":
-                self.encoding = self.my_label_encoding
+                self.encoding = my_label_encoding
             case _:
                 raise Exception("Method of mapping sentences into digital form is not chosen.")
 
@@ -96,62 +96,64 @@ class DataPreparation:
         self.X, self.words = self.encoding(texts, self.y)
         return self.X, self.words, self.y
 
-    def my_vectorizer(texts, y):
-        total_count, class_count = {}, {}
-        class_num = len(set(y))
-        for i in range(len(texts)):
-            for word in texts[i]:
-                if(word not in class_count):
-                    class_count[word] = [0 for c in range(class_num)]
-                    class_count[word][y[i]] = 1 #MARK THAT WORD APPEARS IN THIS CLASS
+
+def my_vectorizer(texts, y):
+    total_count, class_count = {}, {}
+    class_num = len(set(y))
+    for i in range(len(texts)):
+        for word in texts[i]:
+            if(word not in class_count):
+                class_count[word] = [0 for c in range(class_num)]
+                class_count[word][y[i]] = 1 #MARK THAT WORD APPEARS IN THIS CLASS
+            else:
+                class_count[word][y[i]] += 1
+
+    count = {k : sum(class_count[k]) for k in class_count.keys()}
+    total_count = copy.deepcopy(count)
+    for word in class_count.keys():
+        class_count[word] = [class_count[word][i] / total_count[word] for i in range(len(class_count[word]))]
+
+    count = {word: c for word, c in count.items() if c >= 20
+             if stop_word(word) == False
+             if max(class_count[word]) >= 0.45
+             if min(class_count[word]) <= 0.25
+             } #deletion words under these criterias
+
+    words = {word : i for i, word in enumerate(count.keys())}
+    result = np.zeros(shape = (len(texts), len(words)), dtype = 'i4')
+    threshold = 0.45
+    for i in range(len(texts)):
+        for word in texts[i]:
+            if word in words:
+                class_num = y[i]
+                if class_count[word][class_num] < threshold:
+                    result[i][words[word]] = 0
                 else:
-                    class_count[word][y[i]] += 1
+                    result[i][words[word]] += 1
 
-        count = {k : sum(class_count[k]) for k in class_count.keys()}
-        total_count = copy.deepcopy(count)
-        for word in class_count.keys():
-            class_count[word] = [class_count[word][i] / total_count[word] for i in range(len(class_count[word]))]
+    return result, words
 
-        count = {word: c for word, c in count.items() if c >= 20
-                 if stop_word(word) == False
-                 if max(class_count[word]) >= 0.45
-                 if min(class_count[word]) <= 0.25
-                 } #deletion words under these criterias
 
-        words = {word : i for i, word in enumerate(count.keys())}
-        result = np.zeros(shape = (len(texts), len(words)), dtype = 'i4')
-        threshold = 0.45
-        for i in range(len(texts)):
-            for word in texts[i]:
-                if word in words:
-                    class_num = y[i]
-                    if class_count[word][class_num] < threshold:
-                        result[i][words[word]] = 0
-                    else:
-                        result[i][words[word]] += 1
+def my_label_encoding(texts, y):
+    unique = {}
+    ec = {} #0 - padding
+    temp = 1
+    for line in texts:
+        for word in line:
+            if word not in unique:
+                unique[word] = 1
+                ec[word] = temp
+                temp = temp + 1
+            else:
+                unique[word] +=1
 
-        return result, words
+    maxlen = max([len(texts[i]) for i in range(len(texts))])
+    X = np.zeros(shape = (len(texts), maxlen))
+    for i in range(len(texts)):
+        for j in range(len(texts[i])):
+            X[i][j] = ec[texts[i][j]]
 
-    def my_label_encoding(texts, y):
-        unique = {}
-        ec = {} #0 - padding
-        temp = 1
-        for line in texts:
-            for word in line:
-                if word not in unique:
-                    unique[word] = 1
-                    ec[word] = temp
-                    temp = temp + 1
-                else:
-                    unique[word] +=1
-
-        maxlen = max([len(texts[i]) for i in range(len(texts))])
-        X = np.zeros(shape = (len(texts), maxlen))
-        for i in range(len(texts)):
-            for j in range(len(texts[i])):
-                X[i][j] = ec[texts[i][j]]
-
-        return X, ec
+    return X, ec
 
 
 def time_count(func):
@@ -175,7 +177,7 @@ def model_training():
 
 
 dpr = DataPreparation(DataLoader())
-X, words, y = dpr.load()
+X, words, y = dpr.get_data()
 
 models = {0: GaussianNB(), 1: NaiveBayes(), 2: OneVSOne(NaiveBayes), 3: OneVSRest(NaiveBayes)}
 
