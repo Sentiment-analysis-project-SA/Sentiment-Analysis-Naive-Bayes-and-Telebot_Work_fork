@@ -27,7 +27,9 @@ class NaiveBayes:
     def predict(self, X: np.array):
         result = np.zeros(shape = (len(X)))
         for i in range(len(X)):
-            result[i] = ((self.freq[:, X[i] != 0] * X[i][X[i] != 0]).prod(axis = 1) * self.apriori).argmax()
+            freq = self.freq[:, X[i] != 0.0]
+            freq[freq == 0.0] = 0.000000000001
+            result[i] = ((freq * X[i][X[i] != 0.0]).prod(axis = 1) * self.apriori).argmax()
         return result
 
     def __repr__(self):
